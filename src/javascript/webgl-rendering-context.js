@@ -293,12 +293,18 @@ class WebGLRenderingContextHelper extends NativeWebGLRenderingContext {
     return null
   }
 
-  _isConstantBlendFunc (factor) {
+  _isConstantColorBlendFunc (factor) {
     return (
       factor === this.CONSTANT_COLOR ||
-      factor === this.ONE_MINUS_CONSTANT_COLOR ||
+      factor === this.ONE_MINUS_CONSTANT_COLOR
+    )
+  }
+
+  _isConstantAlphaBlendFunc (factor) {
+    return (
       factor === this.CONSTANT_ALPHA ||
-      factor === this.ONE_MINUS_CONSTANT_ALPHA)
+      factor === this.ONE_MINUS_CONSTANT_ALPHA
+    )
   }
 
   _isObject (object, method, Wrapper) {
@@ -868,7 +874,18 @@ class WebGLRenderingContextHelper extends NativeWebGLRenderingContext {
       this.setError(this.INVALID_ENUM)
       return
     }
-    if (this._isConstantBlendFunc(sfactor) && this._isConstantBlendFunc(dfactor)) {
+
+    // https://registry.khronos.org/webgl/specs/1.0/
+    // 6.13 Blending With Constant Color
+    // In the WebGL API, constant color and constant alpha cannot be used together as source 
+    // and destination factors in the blend function. A call to blendFunc will generate an 
+    // INVALID_OPERATION error if one of the two factors is set to CONSTANT_COLOR or ONE_MINUS_CONSTANT_COLOR 
+    // and the other to CONSTANT_ALPHA or ONE_MINUS_CONSTANT_ALPHA. A call to blendFuncSeparate will generate an 
+    // INVALID_OPERATION error if srcRGB is set to CONSTANT_COLOR or ONE_MINUS_CONSTANT_COLOR and dstRGB is set to 
+    // CONSTANT_ALPHA or ONE_MINUS_CONSTANT_ALPHA or vice versa.
+
+    if (this._isConstantColorBlendFunc(sfactor) && this._isConstantAlphaBlendFunc(dfactor) ||
+      this._isConstantColorBlendFunc(dfactor) && this._isConstantAlphaBlendFunc(sfactor)) {
       this.setError(this.INVALID_OPERATION)
       return
     }
@@ -893,8 +910,17 @@ class WebGLRenderingContextHelper extends NativeWebGLRenderingContext {
       return
     }
 
-    if ((this._isConstantBlendFunc(srcRGB) && this._isConstantBlendFunc(dstRGB)) ||
-      (this._isConstantBlendFunc(srcAlpha) && this._isConstantBlendFunc(dstAlpha))) {
+    // https://registry.khronos.org/webgl/specs/1.0/
+    // 6.13 Blending With Constant Color
+    // In the WebGL API, constant color and constant alpha cannot be used together as source 
+    // and destination factors in the blend function. A call to blendFunc will generate an 
+    // INVALID_OPERATION error if one of the two factors is set to CONSTANT_COLOR or ONE_MINUS_CONSTANT_COLOR 
+    // and the other to CONSTANT_ALPHA or ONE_MINUS_CONSTANT_ALPHA. A call to blendFuncSeparate will generate an 
+    // INVALID_OPERATION error if srcRGB is set to CONSTANT_COLOR or ONE_MINUS_CONSTANT_COLOR and dstRGB is set to 
+    // CONSTANT_ALPHA or ONE_MINUS_CONSTANT_ALPHA or vice versa.
+
+    if ((this._isConstantColorBlendFunc(srcRGB) && this._isConstantAlphaBlendFunc(dstRGB)) ||
+      (this._isConstantColorBlendFunc(dstRGB) && this._isConstantAlphaBlendFunc(srcRGB))) {
       this.setError(this.INVALID_OPERATION)
       return
     }
