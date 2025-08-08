@@ -1,6 +1,6 @@
 {
-  "name": "gl",
-  "version": "9.0.0-rc.6",
+  "name": "@figma/gl",
+  "version": "9.0.0-rc.6-figma.1",
   "description": "Creates a WebGL context without a window",
   "main": "index.js",
   "browser": "src/javascript/browser-index.js",
@@ -36,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/stackgl/headless-gl.git"
+    "url": "git://github.com/figma/headless-gl.git"
   },
   "keywords": [
     "webgl",
